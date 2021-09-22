@@ -178,3 +178,4 @@ do_rust_create_wrappers () {
 
 addtask rust_create_wrappers before do_configure after do_patch do_prepare_recipe_sysroot
 do_rust_create_wrappers[dirs] += "${WRAPPER_DIR}"
+do_rust_create_wrappers[vardepsexclude] += "RUSTBASE"
