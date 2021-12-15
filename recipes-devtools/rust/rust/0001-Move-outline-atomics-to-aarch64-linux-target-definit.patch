@@ -1,0 +1,102 @@
+From e02d262849130c156d45ec7198b3d67be508b8c5 Mon Sep 17 00:00:00 2001
+From: Josh Stone <jistone@redhat.com>
+Date: Fri, 5 Nov 2021 10:28:12 -0700
+Subject: [PATCH] Move outline-atomics to aarch64-linux target definitions
+
+Signed-off-by: Alex Kiernan <alexk@zuma.ai>
+Upstream-Status: Backport
+---
+ compiler/rustc_codegen_llvm/src/llvm_util.rs              | 8 --------
+ .../rustc_target/src/spec/aarch64_be_unknown_linux_gnu.rs | 1 +
+ .../src/spec/aarch64_be_unknown_linux_gnu_ilp32.rs        | 1 +
+ .../rustc_target/src/spec/aarch64_unknown_linux_gnu.rs    | 1 +
+ .../src/spec/aarch64_unknown_linux_gnu_ilp32.rs           | 1 +
+ .../rustc_target/src/spec/aarch64_unknown_linux_musl.rs   | 6 +++++-
+ 6 files changed, 9 insertions(+), 9 deletions(-)
+
+diff --git a/compiler/rustc_codegen_llvm/src/llvm_util.rs b/compiler/rustc_codegen_llvm/src/llvm_util.rs
+index c2136f16120a..c5deb11edd09 100644
+--- a/compiler/rustc_codegen_llvm/src/llvm_util.rs
++++ b/compiler/rustc_codegen_llvm/src/llvm_util.rs
+@@ -416,14 +416,6 @@ pub fn llvm_global_features(sess: &Session) -> Vec<String> {
+     // -Ctarget-features
+     features.extend(sess.opts.cg.target_feature.split(',').flat_map(&filter));
+ 
+-    // FIXME: Move outline-atomics to target definition when earliest supported LLVM is 12.
+-    if get_version() >= (12, 0, 0)
+-        && sess.target.llvm_target.contains("aarch64-unknown-linux")
+-        && sess.target.llvm_target != "aarch64-unknown-linux-musl"
+-    {
+-        features.push("+outline-atomics".to_string());
+-    }
+-
+     features
+ }
+ 
+diff --git a/compiler/rustc_target/src/spec/aarch64_be_unknown_linux_gnu.rs b/compiler/rustc_target/src/spec/aarch64_be_unknown_linux_gnu.rs
+index 71ee6deb07f9..a393858879bf 100644
+--- a/compiler/rustc_target/src/spec/aarch64_be_unknown_linux_gnu.rs
++++ b/compiler/rustc_target/src/spec/aarch64_be_unknown_linux_gnu.rs
+@@ -8,6 +8,7 @@ pub fn target() -> Target {
+         data_layout: "E-m:e-i8:8:32-i16:16:32-i64:64-i128:128-n32:64-S128".to_string(),
+         arch: "aarch64".to_string(),
+         options: TargetOptions {
++            features: "+outline-atomics".to_string(),
+             max_atomic_width: Some(128),
+             mcount: "\u{1}_mcount".to_string(),
+             endian: Endian::Big,
+diff --git a/compiler/rustc_target/src/spec/aarch64_be_unknown_linux_gnu_ilp32.rs b/compiler/rustc_target/src/spec/aarch64_be_unknown_linux_gnu_ilp32.rs
+index e05360ea45c6..e75100f14351 100644
+--- a/compiler/rustc_target/src/spec/aarch64_be_unknown_linux_gnu_ilp32.rs
++++ b/compiler/rustc_target/src/spec/aarch64_be_unknown_linux_gnu_ilp32.rs
+@@ -12,6 +12,7 @@ pub fn target() -> Target {
+         arch: "aarch64".to_string(),
+         options: TargetOptions {
+             abi: "ilp32".to_string(),
++            features: "+outline-atomics".to_string(),
+             mcount: "\u{1}_mcount".to_string(),
+             endian: Endian::Big,
+             ..base
+diff --git a/compiler/rustc_target/src/spec/aarch64_unknown_linux_gnu.rs b/compiler/rustc_target/src/spec/aarch64_unknown_linux_gnu.rs
+index 3e92ecbae054..4d128d88edeb 100644
+--- a/compiler/rustc_target/src/spec/aarch64_unknown_linux_gnu.rs
++++ b/compiler/rustc_target/src/spec/aarch64_unknown_linux_gnu.rs
+@@ -7,6 +7,7 @@ pub fn target() -> Target {
+         data_layout: "e-m:e-i8:8:32-i16:16:32-i64:64-i128:128-n32:64-S128".to_string(),
+         arch: "aarch64".to_string(),
+         options: TargetOptions {
++            features: "+outline-atomics".to_string(),
+             mcount: "\u{1}_mcount".to_string(),
+             max_atomic_width: Some(128),
+             supported_sanitizers: SanitizerSet::ADDRESS
+diff --git a/compiler/rustc_target/src/spec/aarch64_unknown_linux_gnu_ilp32.rs b/compiler/rustc_target/src/spec/aarch64_unknown_linux_gnu_ilp32.rs
+index 8522405f61fe..1c931d5a705f 100644
+--- a/compiler/rustc_target/src/spec/aarch64_unknown_linux_gnu_ilp32.rs
++++ b/compiler/rustc_target/src/spec/aarch64_unknown_linux_gnu_ilp32.rs
+@@ -8,6 +8,7 @@ pub fn target() -> Target {
+         arch: "aarch64".to_string(),
+         options: TargetOptions {
+             abi: "ilp32".to_string(),
++            features: "+outline-atomics".to_string(),
+             max_atomic_width: Some(128),
+             mcount: "\u{1}_mcount".to_string(),
+             ..super::linux_gnu_base::opts()
+diff --git a/compiler/rustc_target/src/spec/aarch64_unknown_linux_musl.rs b/compiler/rustc_target/src/spec/aarch64_unknown_linux_musl.rs
+index 6a16b4ce4196..0770f3496c27 100644
+--- a/compiler/rustc_target/src/spec/aarch64_unknown_linux_musl.rs
++++ b/compiler/rustc_target/src/spec/aarch64_unknown_linux_musl.rs
+@@ -9,6 +9,10 @@ pub fn target() -> Target {
+         pointer_width: 64,
+         data_layout: "e-m:e-i8:8:32-i16:16:32-i64:64-i128:128-n32:64-S128".to_string(),
+         arch: "aarch64".to_string(),
+-        options: TargetOptions { mcount: "\u{1}_mcount".to_string(), ..base },
++        options: TargetOptions {
++            features: "+outline-atomics".to_string(),
++            mcount: "\u{1}_mcount".to_string(),
++            ..base
++        },
+     }
+ }
+-- 
+2.17.1
+

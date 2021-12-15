@@ -2,6 +2,11 @@ require rust-target.inc
 require rust-source.inc
 require rust-snapshot.inc
 
+SRC_URI += " \
+    file://0001-Move-outline-atomics-to-aarch64-linux-target-definit.patch \
+    file://0001-Disable-aarch64-outline-atomics-with-musl-for-now.patch \
+"
+
 INSANE_SKIP_${PN}_class-native = "already-stripped"
 
 do_compile () {
