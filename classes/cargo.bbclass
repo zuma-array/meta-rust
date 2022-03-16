@@ -13,6 +13,7 @@ BASEDEPENDS_append = " cargo-native"
 
 # Ensure we get the right rust variant
 DEPENDS_append_class-target = " virtual/${TARGET_PREFIX}rust ${RUSTLIB_DEP}"
+DEPENDS_append_class-nativesdk = " virtual/${TARGET_PREFIX}rust ${RUSTLIB_DEP}"
 DEPENDS_append_class-native = " rust-native"
 
 # Enable build separation
