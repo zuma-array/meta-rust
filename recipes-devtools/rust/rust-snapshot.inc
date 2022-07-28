@@ -1,5 +1,8 @@
 ## This is information on the rust-snapshot (binary) used to build our current release.
 ## snapshot info is taken from rust/src/stage0.txt
+## Rust is self-hosting and bootstraps itself with a pre-built previous version of itself.
+## The exact (previous) version that has been used is specified in the source tarball.
+## The version is replicated here.
 ## TODO: find a way to add additional SRC_URIs based on the contents of an
 ##       earlier SRC_URI.
 RS_VERSION = "1.61.0"
