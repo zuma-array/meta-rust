@@ -57,7 +57,7 @@ cargo_common_do_configure () {
 
 		[source.crates-io]
 		replace-with = "bitbake"
-		local-registry = "/nonexistant"
+		local-registry = "/nonexistent"
 		EOF
 	fi
 
@@ -104,7 +104,7 @@ cargo_common_do_configure () {
 		cat <<- EOF >> ${CARGO_HOME}/config
 
 		[build]
-		# Use out of tree build destination to avoid poluting the source tree
+		# Use out of tree build destination to avoid polluting the source tree
 		target-dir = "${B}/target"
 		EOF
 	fi
