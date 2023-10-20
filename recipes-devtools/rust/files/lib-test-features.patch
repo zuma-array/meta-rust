@@ -1,0 +1,18 @@
+The cargo recipe builds the crates with 'panic-unwind' and 'backtrace' features but these features are removed from 'library/test' crate and this results in build issues. So, the required feature support is added back to resolve build issues.
+
+Upstream-Status: Inappropriate [patches need rework]
+Signed-off-by: Sundeep KOKKONDA <sundeep.kokkonda@windriver.com> 
+---
+diff --git a/library/test/Cargo.toml b/library/test/Cargo.toml
+index 91a1abde059..34d02c53ed1 100644
+--- a/library/test/Cargo.toml
++++ b/library/test/Cargo.toml
+@@ -12,3 +12,8 @@ std = { path = "../std" }
+ core = { path = "../core" }
+ panic_unwind = { path = "../panic_unwind" }
+ panic_abort = { path = "../panic_abort" }
++
++[features]
++backtrace = ["std/backtrace"]
++panic-unwind = ["std/panic_unwind"]
++
