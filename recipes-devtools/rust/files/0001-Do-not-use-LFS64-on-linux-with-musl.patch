@@ -14,15 +14,10 @@ namespace changes [1]
 Upstream-Status: Submitted [https://github.com/rust-lang/rust/pull/106246]
 Signed-off-by: Khem Raj <raj.khem@gmail.com>
 ---
- library/std/src/os/linux/fs.rs |  9 ++++++++-
- library/std/src/sys/unix/fd.rs | 14 ++++++++++----
- library/std/src/sys/unix/fs.rs | 27 ++++++++++++++++++++-------
- 3 files changed, 38 insertions(+), 12 deletions(-)
-
-Index: rustc-1.71.0-src/library/std/src/os/linux/fs.rs
-===================================================================
---- rustc-1.71.0-src.orig/library/std/src/os/linux/fs.rs
-+++ rustc-1.71.0-src/library/std/src/os/linux/fs.rs
+diff --git a/library/std/src/os/linux/fs.rs b/library/std/src/os/linux/fs.rs
+index 479bbcc17a8..ab0b2a3eda3 100644
+--- a/library/std/src/os/linux/fs.rs
++++ b/library/std/src/os/linux/fs.rs
 @@ -329,7 +329,14 @@ pub trait MetadataExt {
  impl MetadataExt for Metadata {
      #[allow(deprecated)]
@@ -39,13 +34,13 @@ Index: rustc-1.71.0-src/library/std/src/os/linux/fs.rs
      }
      fn st_dev(&self) -> u64 {
          self.as_inner().as_inner().st_dev as u64
-Index: rustc-1.71.0-src/library/std/src/sys/unix/fd.rs
-===================================================================
---- rustc-1.71.0-src.orig/library/std/src/sys/unix/fd.rs
-+++ rustc-1.71.0-src/library/std/src/sys/unix/fd.rs
-@@ -122,9 +122,12 @@ impl FileDesc {
+diff --git a/library/std/src/sys/unix/fd.rs b/library/std/src/sys/unix/fd.rs
+index 85e020ae413..7489d5d23fe 100644
+--- a/library/std/src/sys/unix/fd.rs
++++ b/library/std/src/sys/unix/fd.rs
+@@ -124,9 +124,12 @@ pub fn read_to_end(&self, buf: &mut Vec<u8>) -> io::Result<usize> {
      }
- 
+
      pub fn read_at(&self, buf: &mut [u8], offset: u64) -> io::Result<usize> {
 -        #[cfg(not(any(target_os = "linux", target_os = "android")))]
 +        #[cfg(not(any(
@@ -56,11 +51,11 @@ Index: rustc-1.71.0-src/library/std/src/sys/unix/fd.rs
 -        #[cfg(any(target_os = "linux", target_os = "android"))]
 +        #[cfg(any(all(target_os = "linux", not(target_env = "musl")), target_os = "android"))]
          use libc::pread64;
- 
+
          unsafe {
-@@ -277,9 +280,12 @@ impl FileDesc {
+@@ -281,9 +284,12 @@ pub fn is_write_vectored(&self) -> bool {
      }
- 
+
      pub fn write_at(&self, buf: &[u8], offset: u64) -> io::Result<usize> {
 -        #[cfg(not(any(target_os = "linux", target_os = "android")))]
 +        #[cfg(not(any(
@@ -71,13 +66,13 @@ Index: rustc-1.71.0-src/library/std/src/sys/unix/fd.rs
 -        #[cfg(any(target_os = "linux", target_os = "android"))]
 +        #[cfg(any(all(target_os = "linux", not(target_env = "musl")), target_os = "android"))]
          use libc::pwrite64;
- 
+
          unsafe {
-Index: rustc-1.71.0-src/library/std/src/sys/unix/fs.rs
-===================================================================
---- rustc-1.71.0-src.orig/library/std/src/sys/unix/fs.rs
-+++ rustc-1.71.0-src/library/std/src/sys/unix/fs.rs
-@@ -47,9 +47,13 @@ use libc::{c_int, mode_t};
+diff --git a/library/std/src/sys/unix/fs.rs b/library/std/src/sys/unix/fs.rs
+index a5604c92a80..cc1aab45e71 100644
+--- a/library/std/src/sys/unix/fs.rs
++++ b/library/std/src/sys/unix/fs.rs
+@@ -39,9 +39,13 @@
      all(target_os = "linux", target_env = "gnu")
  ))]
  use libc::c_char;
@@ -93,10 +88,10 @@ Index: rustc-1.71.0-src/library/std/src/sys/unix/fs.rs
  use libc::fstatat64;
  #[cfg(any(
      target_os = "android",
-@@ -58,9 +62,10 @@ use libc::fstatat64;
-     target_os = "redox",
+@@ -51,9 +55,10 @@
      target_os = "illumos",
      target_os = "nto",
+     target_os = "vita",
 +    target_env = "musl",
  ))]
  use libc::readdir as readdir64;
@@ -105,7 +100,7 @@ Index: rustc-1.71.0-src/library/std/src/sys/unix/fs.rs
  use libc::readdir64;
  #[cfg(any(target_os = "emscripten", target_os = "l4re"))]
  use libc::readdir64_r;
-@@ -81,7 +86,13 @@ use libc::{
+@@ -75,7 +80,13 @@
      dirent as dirent64, fstat as fstat64, fstatat as fstatat64, ftruncate64, lseek64,
      lstat as lstat64, off64_t, open as open64, stat as stat64,
  };
@@ -119,16 +114,16 @@ Index: rustc-1.71.0-src/library/std/src/sys/unix/fs.rs
      target_os = "linux",
      target_os = "emscripten",
      target_os = "l4re",
-@@ -91,7 +102,7 @@ use libc::{
+@@ -85,7 +96,7 @@
      dirent as dirent64, fstat as fstat64, ftruncate as ftruncate64, lseek as lseek64,
      lstat as lstat64, off_t as off64_t, open as open64, stat as stat64,
  };
 -#[cfg(any(target_os = "linux", target_os = "emscripten", target_os = "l4re"))]
 +#[cfg(any(not(target_env = "musl"), target_os = "emscripten", target_os = "l4re"))]
  use libc::{dirent64, fstat64, ftruncate64, lseek64, lstat64, off64_t, open64, stat64};
- 
+
  pub use crate::sys_common::fs::try_exists;
-@@ -278,6 +289,7 @@ unsafe impl Sync for Dir {}
+@@ -272,6 +283,7 @@ unsafe impl Sync for Dir {}
  #[cfg(any(
      target_os = "android",
      target_os = "linux",
@@ -136,29 +131,30 @@ Index: rustc-1.71.0-src/library/std/src/sys/unix/fs.rs
      target_os = "solaris",
      target_os = "illumos",
      target_os = "fuchsia",
-@@ -312,6 +324,7 @@ struct dirent64_min {
+@@ -313,6 +325,7 @@ struct dirent64_min {
  }
- 
+
  #[cfg(not(any(
 +    target_env = "musl",
      target_os = "android",
      target_os = "linux",
      target_os = "solaris",
-@@ -805,7 +818,7 @@ impl DirEntry {
+@@ -809,7 +822,7 @@ pub fn file_name(&self) -> OsString {
      }
- 
+
      #[cfg(all(
 -        any(target_os = "linux", target_os = "emscripten", target_os = "android"),
 +        any(not(target_env = "musl"), target_os = "emscripten", target_os = "android"),
          not(miri)
      ))]
      pub fn metadata(&self) -> io::Result<FileAttr> {
-@@ -829,7 +842,7 @@ impl DirEntry {
+@@ -833,7 +846,7 @@ pub fn metadata(&self) -> io::Result<FileAttr> {
      }
- 
+
      #[cfg(any(
 -        not(any(target_os = "linux", target_os = "emscripten", target_os = "android")),
 +        not(any(not(target_env = "musl"), target_os = "emscripten", target_os = "android")),
          miri
      ))]
      pub fn metadata(&self) -> io::Result<FileAttr> {
+
