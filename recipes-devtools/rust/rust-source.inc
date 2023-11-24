@@ -11,8 +11,5 @@ SRC_URI[rust.sha256sum] = "5814699031aafdcc2e2f71fc9b389678cd7042350d1583da06146
 
 RUSTSRC = "${WORKDIR}/rustc-${RUST_VERSION}-src"
 
-# Used by crossbeam_atomic.patch
-export TARGET_VENDOR
-
 UPSTREAM_CHECK_URI = "https://forge.rust-lang.org/infra/other-installation-methods.html"
 UPSTREAM_CHECK_REGEX = "rustc-(?P<pver>\d+(\.\d+)+)-src"
