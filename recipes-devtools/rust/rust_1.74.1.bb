@@ -309,6 +309,10 @@ python do_update_snapshot() {
             arch = m.group('arch')
             src_uri[arch].append(f"SRC_URI[{component}-snapshot-{arch}.sha256sum] = \"{v}\"")
 
+    config = """\
+RUST_DIST_SERVER ??= "%s"
+""" % config_dist_server
+
     snapshot = """\
 ## This is information on the rust-snapshot (binary) used to build our current release.
 ## snapshot info is taken from rust/src/stage0.json
@@ -330,12 +334,13 @@ SRC_URI += " \\
     ${RUST_DIST_SERVER}/dist/${CARGO_SNAPSHOT}.tar.xz;name=cargo-snapshot-${RUST_BUILD_ARCH};subdir=rust-snapshot-components \\
 "
 
-RUST_DIST_SERVER = "%s"
-
 RUST_STD_SNAPSHOT = "rust-std-${SNAPSHOT_VERSION}-${RUST_BUILD_ARCH}-unknown-linux-gnu"
 RUSTC_SNAPSHOT = "rustc-${SNAPSHOT_VERSION}-${RUST_BUILD_ARCH}-unknown-linux-gnu"
 CARGO_SNAPSHOT = "cargo-${SNAPSHOT_VERSION}-${RUST_BUILD_ARCH}-unknown-linux-gnu"
-""" % config_dist_server
+"""
+
+    with open(os.path.join(d.getVar("THISDIR"), "rust-config.inc"), "w") as f:
+        f.write(config)
 
     with open(os.path.join(d.getVar("THISDIR"), "rust-snapshot.inc"), "w") as f:
         f.write(snapshot)

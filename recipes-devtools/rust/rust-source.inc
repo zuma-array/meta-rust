@@ -1,6 +1,8 @@
+require rust-config.inc
+
 RUST_VERSION ?= "${@d.getVar('PV').split('-')[0]}"
 
-SRC_URI += "https://static.rust-lang.org/dist/rustc-${RUST_VERSION}-src.tar.xz;name=rust \
+SRC_URI += "${RUST_DIST_SERVER}/dist/rustc-${RUST_VERSION}-src.tar.xz;name=rust \
             file://hardcodepaths.patch;patchdir=${RUSTSRC} \
             file://0001-Don-t-use-LFS64-symbols-on-musl.patch;patchdir=${RUSTSRC} \
             file://zlib-off64_t.patch;patchdir=${RUSTSRC} \
