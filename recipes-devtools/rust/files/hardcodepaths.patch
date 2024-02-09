@@ -6,11 +6,11 @@ Upstream-Status: Inappropriate [patches need rework]
 Signed-off-by: Richard Purdie <richard.purdie@linuxfoundation.org>
 Signed-off-by: Alex Kiernan <alex.kiernan@gmail.com>
 
-diff --git a/compiler/rustc_codegen_llvm/src/context.rs b/compiler/rustc_codegen_llvm/src/context.rs
-index b4b2ab1e1f8a..8bb3e3f0557c 100644
---- a/compiler/rustc_codegen_llvm/src/context.rs
-+++ b/compiler/rustc_codegen_llvm/src/context.rs
-@@ -158,46 +158,6 @@ pub unsafe fn create_module<'ll>(
+Index: rustc-1.76.0-src/compiler/rustc_codegen_llvm/src/context.rs
+===================================================================
+--- rustc-1.76.0-src.orig/compiler/rustc_codegen_llvm/src/context.rs
++++ rustc-1.76.0-src/compiler/rustc_codegen_llvm/src/context.rs
+@@ -146,46 +146,6 @@ pub unsafe fn create_module<'ll>(
          }
      }
  

@@ -66,6 +66,7 @@ do_rust_setup_snapshot () {
     fi
 }
 addtask rust_setup_snapshot after do_unpack before do_configure
+addtask do_test_compile after do_configure do_rust_gen_targets
 do_rust_setup_snapshot[dirs] += "${WORKDIR}/rust-snapshot"
 do_rust_setup_snapshot[vardepsexclude] += "UNINATIVE_LOADER"
 
@@ -140,13 +141,14 @@ python do_configure() {
     config.add_section("build")
     config.set("build", "submodules", e(False))
     config.set("build", "docs", e(False))
+    config.set("build", "tools", ["rust-demangler",])
 
     rustc = d.expand("${WORKDIR}/rust-snapshot/bin/rustc")
     config.set("build", "rustc", e(rustc))
 
     # Support for the profiler runtime to generate e.g. coverage report,
     # PGO etc.
-    config.set("build", "profiler", e(True))
+    config.set("build", "profiler", e(False))
 
     cargo = d.expand("${WORKDIR}/rust-snapshot/bin/cargo")
     config.set("build", "cargo", e(cargo))
@@ -198,7 +200,11 @@ rust_runx () {
     if [ ${RUST_ALTERNATE_EXE_PATH_NATIVE} != ${RUST_ALTERNATE_EXE_PATH} -a ! -f ${RUST_ALTERNATE_EXE_PATH} ]; then
         mkdir -p `dirname ${RUST_ALTERNATE_EXE_PATH}`
         cp ${RUST_ALTERNATE_EXE_PATH_NATIVE} ${RUST_ALTERNATE_EXE_PATH}
-        chrpath -d ${RUST_ALTERNATE_EXE_PATH}
+        if [ -e ${STAGING_LIBDIR_NATIVE}/libc++.so.1 ]; then
+            chrpath -r \$ORIGIN/../../../../../`basename ${STAGING_DIR_NATIVE}`${libdir_native} ${RUST_ALTERNATE_EXE_PATH}
+        else
+            chrpath -d ${RUST_ALTERNATE_EXE_PATH}
+        fi
     fi
 
     oe_cargo_fix_env
@@ -216,6 +222,11 @@ FILES:${PN} += "${libdir}/*.so"
 FILES:${PN}-dev = ""
 
 do_compile () {
+}
+
+do_test_compile[dirs] = "${B}"
+do_test_compile () {
+    rust_runx build src/tools/remote-test-server --target "${RUST_TARGET_SYS}"
 }
 
 ALLOW_EMPTY:${PN} = "1"
